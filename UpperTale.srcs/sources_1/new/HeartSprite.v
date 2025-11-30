@@ -9,7 +9,9 @@ module HeartSprite(
     input wire i_btn_u,
     input wire i_btn_d,
     output reg o_sprite_on, // 1=on, 0=off
-    output [7:0] o_data
+    output [7:0] o_data,
+    output reg [9:0] heart_x,
+    output reg [8:0] heart_y
 );
 
     // Heart ROM
@@ -23,44 +25,70 @@ module HeartSprite(
     // Heart position and size
     localparam HEART_WIDTH = 24;
     localparam HEART_HEIGHT = 24;
-    reg [9:0] heart_x = 320 - HEART_WIDTH/2;
-    reg [8:0] heart_y = 240 - HEART_HEIGHT/2;
+    
+    initial begin
+        heart_x = 320 - HEART_WIDTH/2;
+        heart_y = 240 - HEART_HEIGHT/2;
+    end
 
     // Movement logic (pixel clock)
     localparam H_SPEED = 10; // Horizontal
     localparam V_SPEED = 10; // Vertical
+    localparam LEFT   = 130;
+    localparam RIGHT  = 506;
+    localparam TOP    = 251;
+    localparam BOTTOM = 391;
+    localparam THICK  = 6;
+    
+    // INNER playable area
+    localparam PLAY_LEFT   = LEFT   + THICK;
+    localparam PLAY_RIGHT  = RIGHT  - THICK;
+    localparam PLAY_TOP    = TOP    + THICK;
+    localparam PLAY_BOTTOM = BOTTOM - THICK;
+
     always @(posedge i_pix_clk or posedge i_rst) begin
-        // Ensure that it update once per frame
-        if (i_x == 639 && i_y == 479) begin
-            if (i_rst) begin
-                heart_x <= 320 - HEART_WIDTH/2;
-                heart_y <= 240 - HEART_HEIGHT/2;
-            end else begin
-                // Horizontal
-                if (i_btn_l && heart_x >= H_SPEED)
-                    heart_x <= heart_x - H_SPEED;
-                else if (i_btn_l)
-                    heart_x <= 0;
-                
-                if (i_btn_r && heart_x <= (640 - HEART_WIDTH - H_SPEED))
-                    heart_x <= heart_x + H_SPEED;
-                else if (i_btn_r)
-                    heart_x <= 640 - HEART_WIDTH;
-                
-                // Vertical
-                if (i_btn_u && heart_y >= V_SPEED)
-                    heart_y <= heart_y - V_SPEED;
-                else if (i_btn_u)
-                    heart_y <= 0;
-                
-                if (i_btn_d && heart_y <= (480 - HEART_HEIGHT - V_SPEED))
-                    heart_y <= heart_y + V_SPEED;
-                else if (i_btn_d)
-                    heart_y <= 480 - HEART_HEIGHT;
-                    
-                if(~i_btn_u && heart_y <= (480 - HEART_HEIGHT - 5))
-                    heart_y <= heart_y + 2;
-            end
+    if (i_rst) begin
+        heart_x <= PLAY_LEFT + ((PLAY_RIGHT-PLAY_LEFT) - HEART_WIDTH)/2;
+        heart_y <= PLAY_TOP  + ((PLAY_BOTTOM-PLAY_TOP) - HEART_HEIGHT)/2;
+    end 
+    else if (i_x == 639 && i_y == 479) begin
+
+        // LEFT
+        if (i_btn_l) begin
+            if (heart_x >= PLAY_LEFT + H_SPEED)
+                heart_x <= heart_x - H_SPEED;
+            else
+                heart_x <= PLAY_LEFT;
+        end
+
+        // RIGHT
+        if (i_btn_r) begin
+            if (heart_x <= (PLAY_RIGHT - HEART_WIDTH - H_SPEED))
+                heart_x <= heart_x + H_SPEED;
+            else
+                heart_x <= (PLAY_RIGHT - HEART_WIDTH);
+        end
+
+        // UP
+        if (i_btn_u) begin
+            if (heart_y >= PLAY_TOP + V_SPEED)
+                heart_y <= heart_y - V_SPEED;
+            else
+                heart_y <= PLAY_TOP;
+        end
+
+        // DOWN
+        if (i_btn_d) begin
+            if (heart_y <= (PLAY_BOTTOM - HEART_HEIGHT - V_SPEED))
+                heart_y <= heart_y + V_SPEED;
+            else
+                heart_y <= (PLAY_BOTTOM - HEART_HEIGHT);
+        end
+
+        // Gravity
+        if (~i_btn_u && heart_y <= (PLAY_BOTTOM - HEART_HEIGHT - 5))
+            heart_y <= heart_y + 2;
+
         end
     end
 

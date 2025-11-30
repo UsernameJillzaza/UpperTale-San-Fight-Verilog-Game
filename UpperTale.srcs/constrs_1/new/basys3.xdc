@@ -9,7 +9,7 @@
 set_property -dict {PACKAGE_PIN W5 IOSTANDARD LVCMOS33} [get_ports CLK]
 create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports CLK]
 ## Use BTNC as Reset Button (active high)
-set_property -dict {PACKAGE_PIN U18 IOSTANDARD LVCMOS33} [get_ports RESET]
+set_property -dict {PACKAGE_PIN V17 IOSTANDARD LVCMOS33} [get_ports RESET]
 ## VGA Connector
 set_property -dict {PACKAGE_PIN G19 IOSTANDARD LVCMOS33} [get_ports {RED[0]}]
 set_property -dict {PACKAGE_PIN H19 IOSTANDARD LVCMOS33} [get_ports {RED[1]}]
@@ -36,4 +36,4 @@ set_property IOSTANDARD LVCMOS33 [get_ports btn_u]
 set_property PACKAGE_PIN W19 [get_ports btn_l]
 set_property PACKAGE_PIN T17 [get_ports btn_r]
 set_property PACKAGE_PIN T18 [get_ports btn_u]
-set_property PACKAGE_PIN U17 [get_ports btn_d]
+set_property PACKAGE_PIN U18 [get_ports btn_d]
